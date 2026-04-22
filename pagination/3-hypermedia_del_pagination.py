@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Deletion-resilient hypermedia pagination
+Implement deletion-resilient hypermedia pagination.
 """
 
 import csv
@@ -75,12 +75,12 @@ class Server:
                 data.append(indexed_data[current_index])
             current_index += 1
 
-        # Find next valid index
         next_index = current_index
-        while next_index < total_items and next_index not in indexed_data:
-            next_index += 1
-
         if next_index >= total_items:
+            next_index = None
+        elif not any(
+            i in indexed_data for i in range(next_index, total_items)
+        ):
             next_index = None
 
         return {
