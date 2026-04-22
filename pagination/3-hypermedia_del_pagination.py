@@ -4,7 +4,6 @@ Deletion-resilient hypermedia pagination
 """
 
 import csv
-import math
 from typing import List, Dict, Union, Any
 
 
@@ -60,7 +59,7 @@ class Server:
             AssertionError: If index is out of valid range.
         """
         indexed_data = self.indexed_dataset()
-        total_items = len(indexed_data)
+        total_items = len(self.dataset())
 
         if index is None:
             index = 0
@@ -87,6 +86,6 @@ class Server:
         return {
             "index": index,
             "data": data,
-            "page_size": page_size,
+            "page_size": len(data),
             "next_index": next_index,
         }
