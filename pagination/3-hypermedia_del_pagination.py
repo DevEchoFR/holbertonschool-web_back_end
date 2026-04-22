@@ -4,7 +4,7 @@ Implement deletion-resilient hypermedia pagination.
 """
 
 import csv
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Any
 
 
 class Server:
@@ -39,12 +39,13 @@ class Server:
         """
         if self.__indexed_dataset is None:
             dataset = self.dataset()
+            truncated_dataset = dataset[:1000]
             self.__indexed_dataset = {
-                i: dataset[i] for i in range(len(dataset))
+                i: truncated_dataset[i] for i in range(len(truncated_dataset))
             }
         return self.__indexed_dataset
 
-    def get_hyper_index(self, index: Union[int, None] = None,
+    def get_hyper_index(self, index: int = None,
                         page_size: int = 10) -> Dict[str, Any]:
         """Get a page with index-based deletion-resilient pagination.
 
@@ -59,28 +60,27 @@ class Server:
             AssertionError: If index is out of valid range.
         """
         indexed_data = self.indexed_dataset()
-        total_items = len(self.dataset())
 
         if index is None:
             index = 0
 
-        assert isinstance(index, int) and 0 <= index < total_items, \
+        assert isinstance(page_size, int) and page_size > 0
+        assert (
+            isinstance(index, int)
+            and 0 <= index <= max(indexed_data.keys())
+        ), \
             "index out of range"
 
         data = []
-        current_index = index
+        next_index = index
+        max_index = max(indexed_data.keys())
 
-        while len(data) < page_size and current_index < total_items:
-            if current_index in indexed_data:
-                data.append(indexed_data[current_index])
-            current_index += 1
+        while len(data) < page_size and next_index <= max_index:
+            if next_index in indexed_data:
+                data.append(indexed_data[next_index])
+            next_index += 1
 
-        next_index = current_index
-        if next_index >= total_items:
-            next_index = None
-        elif not any(
-            i in indexed_data for i in range(next_index, total_items)
-        ):
+        if next_index > max_index:
             next_index = None
 
         return {
