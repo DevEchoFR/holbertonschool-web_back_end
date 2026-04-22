@@ -46,7 +46,8 @@ class Server:
             page_size: Number of items per page (default 10)
 
         Returns:
-            The requested page of the dataset, or an empty list if out of range.
+            The requested page of the dataset,
+            or an empty list if out of range.
 
         Raises:
             AssertionError: If page or page_size are not positive integers.

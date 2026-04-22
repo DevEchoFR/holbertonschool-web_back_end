@@ -46,7 +46,8 @@ class Server:
             page_size: Number of items per page (default 10)
 
         Returns:
-            The requested page of the dataset, or an empty list if out of range.
+            The requested page of the dataset,
+            or an empty list if out of range.
 
         Raises:
             AssertionError: If page or page_size are not positive integers.
@@ -64,9 +65,9 @@ class Server:
 
         return dataset[start:end]
 
-    def get_hyper(self, page: int = 1,
-                  page_size: int = 10) -> Dict[str, Union[int, List[List],
-                                                            None]]:
+    def get_hyper(
+        self, page: int = 1, page_size: int = 10
+    ) -> Dict[str, Union[int, List[List], None]]:
         """Get a page with hypermedia metadata.
 
         Args:
@@ -79,7 +80,9 @@ class Server:
         data = self.get_page(page, page_size)
         dataset = self.dataset()
         total_items = len(dataset)
-        total_pages = math.ceil(total_items / page_size) if page_size > 0 else 0
+        total_pages = (
+            math.ceil(total_items / page_size) if page_size > 0 else 0
+        )
 
         next_page = page + 1 if page < total_pages else None
         prev_page = page - 1 if page > 1 else None
