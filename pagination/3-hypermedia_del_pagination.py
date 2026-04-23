@@ -60,6 +60,7 @@ class Server:
             AssertionError: If index is out of valid range.
         """
         indexed_data = self.indexed_dataset()
+        dataset_length = len(self.dataset()[:1000])
 
         if index is None:
             index = 0
@@ -67,20 +68,19 @@ class Server:
         assert isinstance(page_size, int) and page_size > 0
         assert (
             isinstance(index, int)
-            and 0 <= index <= max(indexed_data.keys())
+            and 0 <= index < dataset_length
         ), \
             "index out of range"
 
         data = []
         next_index = index
-        max_index = max(indexed_data.keys())
 
-        while len(data) < page_size and next_index <= max_index:
+        while len(data) < page_size and next_index < dataset_length:
             if next_index in indexed_data:
                 data.append(indexed_data[next_index])
             next_index += 1
 
-        if next_index > max_index:
+        if next_index >= dataset_length:
             next_index = None
 
         return {
