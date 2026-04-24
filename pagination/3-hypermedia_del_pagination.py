@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Implement deletion-resilient hypermedia pagination.
+Deletion-resilient hypermedia pagination
 """
 
 import csv
-from typing import List, Dict, Any
+import math
+from typing import List, Dict
 
 
 class Server:
@@ -12,16 +13,12 @@ class Server:
     """
     DATA_FILE = "Popular_Baby_Names.csv"
 
-    def __init__(self) -> None:
-        """Initialize the server with no cached datasets."""
+    def __init__(self):
         self.__dataset = None
         self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
-        """Cached dataset.
-
-        Returns:
-            The dataset as a list of lists, excluding the header row.
+        """Cached dataset
         """
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
@@ -32,60 +29,39 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
-        """Dataset indexed by sorting position, starting at 0.
-
-        Returns:
-            A dictionary mapping index to dataset rows.
+        """Dataset indexed by sorting position, starting at 0
         """
         if self.__indexed_dataset is None:
             dataset = self.dataset()
             truncated_dataset = dataset[:1000]
             self.__indexed_dataset = {
-                i: truncated_dataset[i] for i in range(len(truncated_dataset))
+                i: dataset[i] for i in range(len(dataset))
             }
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None,
-                        page_size: int = 10) -> Dict[str, Any]:
-        """Get a page with index-based deletion-resilient pagination.
-
-        Args:
-            index: The starting index (default None, treated as 0)
-            page_size: Number of items per page (default 10)
-
-        Returns:
-            A dictionary containing index-based pagination data.
-
-        Raises:
-            AssertionError: If index is out of valid range.
+                        page_size: int = 10) -> Dict:
+        """Get a page of data resilient to deletions between queries.
         """
         indexed_data = self.indexed_dataset()
-        dataset_length = len(self.dataset()[:1000])
+        max_index = max(indexed_data.keys())
 
         if index is None:
             index = 0
 
-        assert isinstance(page_size, int) and page_size > 0
-        assert (
-            isinstance(index, int)
-            and 0 <= index < dataset_length
-        ), \
-            "index out of range"
+        assert 0 <= index <= max_index
 
         data = []
         next_index = index
 
-        while len(data) < page_size and next_index < dataset_length:
+        while len(data) < page_size and next_index <= max_index:
             if next_index in indexed_data:
                 data.append(indexed_data[next_index])
             next_index += 1
 
-        if next_index >= dataset_length:
-            next_index = None
-
         return {
             "index": index,
             "data": data,
-            "page_size": len(data),
+            "page_size": page_size,
             "next_index": next_index,
         }
