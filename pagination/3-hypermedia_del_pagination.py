@@ -13,7 +13,7 @@ class Server:
     """
     DATA_FILE = "Popular_Baby_Names.csv"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize server with no cached dataset."""
         self.__dataset = None
         self.__indexed_dataset = None
